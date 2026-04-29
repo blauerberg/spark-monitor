@@ -32,7 +32,7 @@ def main() -> None:
     psutil.cpu_percent(interval=None)
 
     try:
-        with Live(auto_refresh=False) as live:
+        with Live(auto_refresh=False, screen=True) as live:
             while True:
                 cpu, ram, gpu, procs = collect()
                 if args.compact:
