@@ -1,5 +1,9 @@
 from spark_monitor.collectors import CpuStats, GpuStats, RamStats
-from spark_monitor.display import render_compact_horizontal, render_compact_vertical, render_statusline
+from spark_monitor.display import (
+    render_compact_horizontal,
+    render_compact_vertical,
+    render_statusline,
+)
 
 _GIB = 1024 ** 3
 _CPU = CpuStats(usage=45.0, clock=2000.0, temp=52.0)
