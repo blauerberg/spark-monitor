@@ -26,8 +26,23 @@ Press `Ctrl+C` to exit.
 
 ## Run directly from GitHub
 
+Without installing:
+
 ```bash
 uvx --from git+https://github.com/blauerberg/spark-monitor spark-monitor
+```
+
+Or install as a persistent command:
+
+```bash
+uv tool install git+https://github.com/blauerberg/spark-monitor
+spark-monitor
+```
+
+To upgrade:
+
+```bash
+uv tool upgrade spark-monitor
 ```
 
 ## Display
