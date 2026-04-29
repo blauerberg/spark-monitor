@@ -55,6 +55,23 @@ spark-monitor --interval 0.5
 
 Press `Ctrl+C` to exit.
 
+## tmux statusline integration
+
+`--statusline` prints a single line to stdout and exits immediately, making it suitable for embedding in the tmux status bar.
+
+```bash
+spark-monitor --statusline
+```
+
+Add to `~/.tmux.conf`:
+
+```
+set -g status-right '#(spark-monitor --statusline)'
+set -g status-interval 5
+```
+
+`status-interval` controls how often tmux re-runs the command (in seconds). CPU usage is measured over a 0.5-second window on each invocation, so setting it below `2` is not recommended.
+
 ## Installation from source
 
 ```bash
