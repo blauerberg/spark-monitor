@@ -16,9 +16,9 @@ def _bar(value: float, total: float = 100.0, width: int = _BAR) -> str:
     return "█" * filled + "░" * (width - filled)
 
 
-def _styled_bar(
-    value: float, total: float = 100.0, width: int = _BAR, style: str = ""
-) -> Text:
+def _styled_bar(value: float, total: float = 100.0, width: int = _BAR) -> Text:
+    pct = value / total * 100
+    style = "red" if pct >= 80 else "yellow" if pct >= 50 else "green"
     filled = round(width * value / total)
     t = Text()
     t.append("█" * filled, style=style)
@@ -81,15 +81,15 @@ def render_compact_vertical(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Text
     t.append("\n")
     t.append("  CPU", style="bold cyan")
     t.append("  ")
-    t.append_text(_styled_bar(cpu.usage, width=b, style="cyan"))
+    t.append_text(_styled_bar(cpu.usage, width=b))
     t.append(f"  {cpu.usage:4.0f}%{temp_cpu}\n")
     t.append("  RAM", style="bold green")
     t.append("  ")
-    t.append_text(_styled_bar(ram.used, ram.total, b, style="green"))
+    t.append_text(_styled_bar(ram.used, ram.total, b))
     t.append(f"  {pct_ram:4.0f}%\n")
     t.append("  GPU", style="bold yellow")
     t.append("  ")
-    t.append_text(_styled_bar(gpu.usage, width=b, style="yellow"))
+    t.append_text(_styled_bar(gpu.usage, width=b))
     t.append(f"  {gpu.usage:4.0f}%{temp_gpu}  {gpu.power:.0f}W\n")
     return t
 
@@ -102,15 +102,15 @@ def render_compact_horizontal(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Te
     t.append("\n")
     t.append("  CPU", style="bold cyan")
     t.append(" ")
-    t.append_text(_styled_bar(cpu.usage, width=b, style="cyan"))
+    t.append_text(_styled_bar(cpu.usage, width=b))
     t.append(f"  {cpu.usage:4.0f}%{temp_cpu}    ")
     t.append("RAM", style="bold green")
     t.append(" ")
-    t.append_text(_styled_bar(ram.used, ram.total, b, style="green"))
+    t.append_text(_styled_bar(ram.used, ram.total, b))
     t.append(f"  {pct_ram:4.0f}%    ")
     t.append("GPU", style="bold yellow")
     t.append(" ")
-    t.append_text(_styled_bar(gpu.usage, width=b, style="yellow"))
+    t.append_text(_styled_bar(gpu.usage, width=b))
     t.append(f"  {gpu.usage:4.0f}%  {gpu.temp}°C  {gpu.power:.0f}W\n")
     return t
 
