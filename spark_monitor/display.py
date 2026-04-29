@@ -30,32 +30,36 @@ def _gib(n: int) -> str:
     return f"{n / 1024**3:.1f} GiB"
 
 
-def _section(title: str, *lines: str) -> Text:
-    t = Text()
-    t.append(f"{title}:\n", style="bold")
-    for line in lines:
-        t.append(f"  {line}\n")
-    return t
-
-
 def render_cpu(s: CpuStats) -> Text:
     clock = f"{s.clock / 1000:.2f} GHz" if s.clock else "N/A"
     temp = f"{s.temp:.0f}°C" if s.temp is not None else "N/A"
-    line1 = f"{_bar(s.usage)}  {s.usage:5.1f}%   Clock: {clock}"
-    line2 = f"{'':>{_BAR}}  Temp:  {temp:<9}  Power: N/A"
-    return _section("CPU", line1, line2)
+    t = Text()
+    t.append("CPU:\n", style="bold")
+    t.append("  ")
+    t.append_text(_styled_bar(s.usage))
+    t.append(f"  {s.usage:5.1f}%   Clock: {clock}\n")
+    t.append(f"  {'':>{_BAR}}  Temp:  {temp:<9}  Power: N/A\n")
+    return t
 
 
 def render_ram(s: RamStats) -> Text:
     pct = s.used / s.total * 100
-    line = f"{_bar(s.used, s.total)}  {_gib(s.used)} / {_gib(s.total)} ({pct:.0f}%)"
-    return _section("RAM", line)
+    t = Text()
+    t.append("RAM:\n", style="bold")
+    t.append("  ")
+    t.append_text(_styled_bar(s.used, s.total))
+    t.append(f"  {_gib(s.used)} / {_gib(s.total)} ({pct:.0f}%)\n")
+    return t
 
 
 def render_gpu(s: GpuStats) -> Text:
-    line1 = f"{_bar(s.usage)}  {s.usage:5.1f}%   Clock: {s.clock} MHz"
-    line2 = f"{'':>{_BAR}}  Temp:  {s.temp}°C       Power: {s.power:.0f}W"
-    return _section("GPU", line1, line2)
+    t = Text()
+    t.append("GPU:\n", style="bold")
+    t.append("  ")
+    t.append_text(_styled_bar(s.usage))
+    t.append(f"  {s.usage:5.1f}%   Clock: {s.clock} MHz\n")
+    t.append(f"  {'':>{_BAR}}  Temp:  {s.temp}°C       Power: {s.power:.0f}W\n")
+    return t
 
 
 def render_processes(procs: list[GpuProcess]) -> Group | None:
