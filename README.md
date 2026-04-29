@@ -5,6 +5,8 @@ A minimal CLI for monitoring DGX Spark resource usage. Displays only the essenti
 ## Installation
 
 ```bash
+git clone https://github.com/blauerberg/spark-monitor.git
+cd spark-monitor
 uv sync
 ```
 
@@ -19,6 +21,12 @@ uv run spark-monitor --interval 0.5
 ```
 
 Press `Ctrl+C` to exit.
+
+## Run directly from GitHub
+
+```bash
+uvx --from git+https://github.com/blauerberg/spark-monitor spark-monitor
+```
 
 ## Display
 
