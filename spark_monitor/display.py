@@ -61,7 +61,7 @@ def render_processes(procs: list[GpuProcess]) -> Group | None:
     return Group(header, table)
 
 
-def render_compact(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Text:
+def render_compact_vertical(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Text:
     temp_cpu = f"  {cpu.temp:.0f}°C" if cpu.temp is not None else ""
     temp_gpu = f"  {gpu.temp}°C"
     pct_ram = ram.used / ram.total * 100

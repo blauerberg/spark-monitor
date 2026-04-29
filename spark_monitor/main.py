@@ -8,7 +8,7 @@ import pynvml
 from rich.live import Live
 
 from .collectors import collect
-from .display import render_all, render_compact
+from .display import render_all, render_compact_vertical
 
 
 def main() -> None:
@@ -36,7 +36,7 @@ def main() -> None:
             while True:
                 cpu, ram, gpu, procs = collect()
                 if args.compact:
-                    live.update(render_compact(cpu, ram, gpu))
+                    live.update(render_compact_vertical(cpu, ram, gpu))
                 else:
                     live.update(render_all(cpu, ram, gpu, procs))
                 live.refresh()
