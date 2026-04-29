@@ -176,4 +176,7 @@ poetry.toml
 # LSP config files
 pyrightconfig.json
 
+# Claude local settings
+.claude/*.local.json
+
 # End of https://www.toptal.com/developers/gitignore/api/python
