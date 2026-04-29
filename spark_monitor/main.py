@@ -8,7 +8,7 @@ import pynvml
 from rich.live import Live
 
 from .collectors import collect
-from .display import render_all
+from .display import render_all, render_compact
 
 
 def main() -> None:
@@ -20,6 +20,11 @@ def main() -> None:
         metavar="SEC",
         help="Refresh interval in seconds (default: 1.0)",
     )
+    parser.add_argument(
+        "--compact",
+        action="store_true",
+        help="Show minimal metrics in a compact 3-line layout",
+    )
     args = parser.parse_args()
 
     pynvml.nvmlInit()
@@ -30,7 +35,10 @@ def main() -> None:
         with Live(auto_refresh=False) as live:
             while True:
                 cpu, ram, gpu, procs = collect()
-                live.update(render_all(cpu, ram, gpu, procs))
+                if args.compact:
+                    live.update(render_compact(cpu, ram, gpu))
+                else:
+                    live.update(render_all(cpu, ram, gpu, procs))
                 live.refresh()
                 time.sleep(args.interval)
     except KeyboardInterrupt:

@@ -7,11 +7,12 @@ from rich.text import Text
 from .collectors import CpuStats, GpuProcess, GpuStats, RamStats
 
 _BAR = 24  # bar character width
+_BAR_COMPACT = 16
 
 
-def _bar(value: float, total: float = 100.0) -> str:
-    filled = round(_BAR * value / total)
-    return "█" * filled + "░" * (_BAR - filled)
+def _bar(value: float, total: float = 100.0, width: int = _BAR) -> str:
+    filled = round(width * value / total)
+    return "█" * filled + "░" * (width - filled)
 
 
 def _gib(n: int) -> str:
@@ -58,6 +59,19 @@ def render_processes(procs: list[GpuProcess]) -> Group | None:
         table.add_row(str(p.pid), p.user, _gib(p.mem_bytes), p.command)
     header = Text("GPU Processes:\n", style="bold")
     return Group(header, table)
+
+
+def render_compact(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Text:
+    temp_cpu = f"  {cpu.temp:.0f}°C" if cpu.temp is not None else ""
+    temp_gpu = f"  {gpu.temp}°C"
+    pct_ram = ram.used / ram.total * 100
+    b = _BAR_COMPACT
+    t = Text()
+    t.append(f"CPU  {_bar(cpu.usage, width=b)}  {cpu.usage:4.0f}%{temp_cpu}\n")
+    t.append(f"RAM  {_bar(ram.used, ram.total, b)}  {pct_ram:4.0f}%\n")
+    bar_gpu = _bar(gpu.usage, width=b)
+    t.append(f"GPU  {bar_gpu}  {gpu.usage:4.0f}%{temp_gpu}  {gpu.power:.0f}W\n")
+    return t
 
 
 def render_all(
