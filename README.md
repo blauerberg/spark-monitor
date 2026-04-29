@@ -59,9 +59,6 @@ uv tool upgrade spark-monitor
 
 - **CPU**: usage (bar), clock, temperature, power (N/A)
   - Power is always N/A. The current driver does not expose Grace CPU power.
-    Investigated: tegrastats (not installed), hwmon/powercap (no sensors),
-    `nvmlDeviceGetTotalEnergyConsumption` (GPU-only), `module.power.draw.average` (N/A in nvidia-smi).
-    A future driver update enabling `module.power.draw.average` would make this available.
 - **RAM**: usage (bar)
 - **GPU**: usage (bar), clock, temperature, power
 - **GPU Processes**: processes using the GPU (hidden when none)
