@@ -37,7 +37,7 @@ def render_cpu(s: CpuStats) -> Text:
     t.append("CPU:\n", style="bold")
     t.append("  ")
     t.append_text(_styled_bar(s.usage))
-    t.append(f"  {s.usage:5.1f}%   Clock: {clock}\n")
+    t.append(f" {s.usage:5.1f}%   Clock: {clock}\n")
     t.append(f"  {'':>{_BAR}}  Temp:  {temp:<9}  Power: N/A\n")
     return t
 
@@ -48,7 +48,7 @@ def render_ram(s: RamStats) -> Text:
     t.append("RAM:\n", style="bold")
     t.append("  ")
     t.append_text(_styled_bar(s.used, s.total))
-    t.append(f"  {_gib(s.used)} / {_gib(s.total)} ({pct:.0f}%)\n")
+    t.append(f" {_gib(s.used)} / {_gib(s.total)} ({pct:.0f}%)\n")
     return t
 
 
@@ -57,7 +57,7 @@ def render_gpu(s: GpuStats) -> Text:
     t.append("GPU:\n", style="bold")
     t.append("  ")
     t.append_text(_styled_bar(s.usage))
-    t.append(f"  {s.usage:5.1f}%   Clock: {s.clock} MHz\n")
+    t.append(f" {s.usage:5.1f}%   Clock: {s.clock} MHz\n")
     t.append(f"  {'':>{_BAR}}  Temp:  {s.temp}°C       Power: {s.power:.0f}W\n")
     return t
 
@@ -86,15 +86,15 @@ def render_compact_vertical(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Text
     t.append("  CPU", style="bold cyan")
     t.append("  ")
     t.append_text(_styled_bar(cpu.usage, width=b))
-    t.append(f"  {cpu.usage:4.0f}%{temp_cpu}\n")
+    t.append(f" {cpu.usage:4.0f}%{temp_cpu}\n")
     t.append("  RAM", style="bold green")
     t.append("  ")
     t.append_text(_styled_bar(ram.used, ram.total, b))
-    t.append(f"  {pct_ram:4.0f}%\n")
+    t.append(f" {pct_ram:4.0f}%\n")
     t.append("  GPU", style="bold yellow")
     t.append("  ")
     t.append_text(_styled_bar(gpu.usage, width=b))
-    t.append(f"  {gpu.usage:4.0f}%{temp_gpu}  {gpu.power:.0f}W\n")
+    t.append(f" {gpu.usage:4.0f}%{temp_gpu}  {gpu.power:.0f}W\n")
     return t
 
 
@@ -107,15 +107,15 @@ def render_compact_horizontal(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Te
     t.append("  CPU", style="bold cyan")
     t.append(" ")
     t.append_text(_styled_bar(cpu.usage, width=b))
-    t.append(f"  {cpu.usage:4.0f}%{temp_cpu}    ")
+    t.append(f" {cpu.usage:4.0f}%{temp_cpu}  ")
     t.append("RAM", style="bold green")
     t.append(" ")
     t.append_text(_styled_bar(ram.used, ram.total, b))
-    t.append(f"  {pct_ram:4.0f}%    ")
+    t.append(f" {pct_ram:4.0f}%  ")
     t.append("GPU", style="bold yellow")
     t.append(" ")
     t.append_text(_styled_bar(gpu.usage, width=b))
-    t.append(f"  {gpu.usage:4.0f}%  {gpu.temp}°C  {gpu.power:.0f}W\n")
+    t.append(f" {gpu.usage:4.0f}%  {gpu.temp}°C  {gpu.power:.0f}W\n")
     return t
 
 
@@ -127,15 +127,15 @@ def render_statusline(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Text:
     t.append("CPU", style="bold cyan")
     t.append(" ")
     t.append_text(_styled_bar(cpu.usage, width=b))
-    t.append(f"  {cpu.usage:4.0f}%{temp_cpu}    ")
+    t.append(f" {cpu.usage:4.0f}%{temp_cpu}  ")
     t.append("RAM", style="bold green")
     t.append(" ")
     t.append_text(_styled_bar(ram.used, ram.total, b))
-    t.append(f"  {pct_ram:4.0f}%    ")
+    t.append(f" {pct_ram:4.0f}%  ")
     t.append("GPU", style="bold yellow")
     t.append(" ")
     t.append_text(_styled_bar(gpu.usage, width=b))
-    t.append(f"  {gpu.usage:4.0f}%  {gpu.temp}°C  {gpu.power:.0f}W")
+    t.append(f" {gpu.usage:4.0f}%  {gpu.temp}°C  {gpu.power:.0f}W")
     return t
 
 
