@@ -24,6 +24,16 @@ uv run spark-monitor --interval 0.5
 
 Press `Ctrl+C` to exit.
 
+### Compact mode
+
+Use `--compact` to show only the essential metrics in a minimal 3-line layout.
+
+```bash
+uv run spark-monitor --compact
+```
+
+![Screenshot (compact)](images/screenshot-compact.png)
+
 ## Run directly from GitHub
 
 Without installing:
