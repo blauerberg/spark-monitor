@@ -8,6 +8,7 @@ from .collectors import CpuStats, GpuProcess, GpuStats, RamStats
 
 _BAR = 24  # bar character width
 _BAR_COMPACT = 16
+_BAR_HORIZONTAL = 8
 
 
 def _bar(value: float, total: float = 100.0, width: int = _BAR) -> str:
@@ -71,6 +72,18 @@ def render_compact_vertical(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Text
     t.append(f"RAM  {_bar(ram.used, ram.total, b)}  {pct_ram:4.0f}%\n")
     bar_gpu = _bar(gpu.usage, width=b)
     t.append(f"GPU  {bar_gpu}  {gpu.usage:4.0f}%{temp_gpu}  {gpu.power:.0f}W\n")
+    return t
+
+
+def render_compact_horizontal(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Text:
+    pct_ram = ram.used / ram.total * 100
+    b = _BAR_HORIZONTAL
+    temp_cpu = f"  {cpu.temp:.0f}°C" if cpu.temp is not None else ""
+    t = Text()
+    t.append(f"CPU {_bar(cpu.usage, width=b)}  {cpu.usage:4.0f}%{temp_cpu}    ")
+    t.append(f"RAM {_bar(ram.used, ram.total, b)}  {pct_ram:4.0f}%    ")
+    gpu_bar = _bar(gpu.usage, width=b)
+    t.append(f"GPU {gpu_bar}  {gpu.usage:4.0f}%  {gpu.temp}°C  {gpu.power:.0f}W\n")
     return t
 
 
