@@ -2,6 +2,8 @@
 
 A minimal CLI for monitoring DGX Spark resource usage. Displays only the essential metrics, simply.
 
+![Screenshot](images/screenshot.png)
+
 ## Installation
 
 ```bash
