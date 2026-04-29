@@ -170,6 +170,9 @@ poetry.toml
 # ruff
 .ruff_cache/
 
+# git worktrees
+.worktrees/
+
 # LSP config files
 pyrightconfig.json
 
