@@ -73,11 +73,13 @@ def _proc_command(pid: int) -> str:
         return "?"
 
 
-def collect() -> tuple[CpuStats, RamStats, GpuStats, list[GpuProcess]]:
+def collect(
+    cpu_interval: float | None = None,
+) -> tuple[CpuStats, RamStats, GpuStats, list[GpuProcess]]:
     # CPU
     freq = psutil.cpu_freq()
     cpu = CpuStats(
-        usage=psutil.cpu_percent(interval=None),
+        usage=psutil.cpu_percent(interval=cpu_interval),
         clock=freq.current if freq else None,
         temp=_cpu_temp(),
     )

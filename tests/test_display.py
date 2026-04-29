@@ -1,5 +1,5 @@
 from spark_monitor.collectors import CpuStats, GpuStats, RamStats
-from spark_monitor.display import render_compact_horizontal, render_compact_vertical
+from spark_monitor.display import render_compact_horizontal, render_compact_vertical, render_statusline
 
 _GIB = 1024 ** 3
 _CPU = CpuStats(usage=45.0, clock=2000.0, temp=52.0)
@@ -47,3 +47,21 @@ def test_render_compact_horizontal_omits_cpu_temp_when_none():
     assert "CPU" in plain
     assert "67" in plain   # GPU temp still shown
     assert "52" not in plain
+
+
+def test_render_statusline_is_single_line_no_margins():
+    text = render_statusline(_CPU, _RAM, _GPU)
+    plain = text.plain
+    assert "\n" not in plain
+    assert not plain.startswith(" ")
+
+
+def test_render_statusline_contains_all_metrics():
+    text = render_statusline(_CPU, _RAM, _GPU)
+    plain = text.plain
+    assert "CPU" in plain
+    assert "RAM" in plain
+    assert "GPU" in plain
+    assert "52" in plain   # CPU temp
+    assert "67" in plain   # GPU temp
+    assert "250" in plain  # GPU power

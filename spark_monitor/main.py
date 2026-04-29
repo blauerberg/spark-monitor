@@ -6,16 +6,23 @@ import time
 
 import psutil
 import pynvml
+from rich.console import Console
 from rich.live import Live
 
 from .collectors import collect
-from .display import render_all, render_compact_horizontal, render_compact_vertical
+from .display import (
+    render_all,
+    render_compact_horizontal,
+    render_compact_vertical,
+    render_statusline,
+)
 
 
 class DisplayMode(enum.Enum):
     FULL = "full"
     VERTICAL = "vertical"
     HORIZONTAL = "horizontal"
+    STATUSLINE = "statusline"
 
 
 def _make_parser() -> argparse.ArgumentParser:
@@ -38,6 +45,11 @@ def _make_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Show all metrics in a single line",
     )
+    group.add_argument(
+        "--statusline",
+        action="store_true",
+        help="Print a single line for use in tmux statusline, then exit",
+    )
     return parser
 
 
@@ -48,14 +60,23 @@ def main() -> None:
         mode = DisplayMode.VERTICAL
     elif args.compact_horizontal:
         mode = DisplayMode.HORIZONTAL
+    elif args.statusline:
+        mode = DisplayMode.STATUSLINE
     else:
         mode = DisplayMode.FULL
 
     pynvml.nvmlInit()
-    # Prime psutil so the first cpu_percent() call returns a real value
-    psutil.cpu_percent(interval=None)
-
     try:
+        if mode is DisplayMode.STATUSLINE:
+            # Each invocation is a fresh process, so use a blocking interval
+            # for an accurate CPU reading instead of the primer+loop approach.
+            cpu, ram, gpu, _ = collect(cpu_interval=0.5)
+            Console(highlight=False).print(render_statusline(cpu, ram, gpu))
+            return
+
+        # Prime psutil so the first cpu_percent() call in the loop returns a real value
+        psutil.cpu_percent(interval=None)
+
         with Live(auto_refresh=False, screen=True) as live:
             while True:
                 cpu, ram, gpu, procs = collect()

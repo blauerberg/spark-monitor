@@ -119,6 +119,26 @@ def render_compact_horizontal(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Te
     return t
 
 
+def render_statusline(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Text:
+    pct_ram = ram.used / ram.total * 100
+    b = _BAR_HORIZONTAL
+    temp_cpu = f"  {cpu.temp:.0f}°C" if cpu.temp is not None else ""
+    t = Text()
+    t.append("CPU", style="bold cyan")
+    t.append(" ")
+    t.append_text(_styled_bar(cpu.usage, width=b))
+    t.append(f"  {cpu.usage:4.0f}%{temp_cpu}    ")
+    t.append("RAM", style="bold green")
+    t.append(" ")
+    t.append_text(_styled_bar(ram.used, ram.total, b))
+    t.append(f"  {pct_ram:4.0f}%    ")
+    t.append("GPU", style="bold yellow")
+    t.append(" ")
+    t.append_text(_styled_bar(gpu.usage, width=b))
+    t.append(f"  {gpu.usage:4.0f}%  {gpu.temp}°C  {gpu.power:.0f}W")
+    return t
+
+
 def render_all(
     cpu: CpuStats,
     ram: RamStats,
