@@ -82,8 +82,8 @@ def render_compact_horizontal(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Te
     t = Text()
     t.append(f"CPU {_bar(cpu.usage, width=b)}  {cpu.usage:4.0f}%{temp_cpu}    ")
     t.append(f"RAM {_bar(ram.used, ram.total, b)}  {pct_ram:4.0f}%    ")
-    gpu_bar = _bar(gpu.usage, width=b)
-    t.append(f"GPU {gpu_bar}  {gpu.usage:4.0f}%  {gpu.temp}°C  {gpu.power:.0f}W\n")
+    bar_gpu = _bar(gpu.usage, width=b)
+    t.append(f"GPU {bar_gpu}  {gpu.usage:4.0f}%  {gpu.temp}°C  {gpu.power:.0f}W\n")
     return t
 
 

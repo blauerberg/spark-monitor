@@ -46,3 +46,4 @@ def test_render_compact_horizontal_omits_cpu_temp_when_none():
     plain = text.plain
     assert "CPU" in plain
     assert "67" in plain   # GPU temp still shown
+    assert "52" not in plain
