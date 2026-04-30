@@ -38,7 +38,7 @@ def render_cpu(s: CpuStats) -> Text:
     t.append("  ")
     t.append_text(_styled_bar(s.usage))
     t.append(f" {s.usage:5.1f}%   Clock: {clock}\n")
-    t.append(f"  {'':>{_BAR}}  Temp:  {temp:<9}  Power: N/A\n")
+    t.append(f"  {'':>{_BAR}}  Temp:  {temp:<9}  Power: N/A")
     return t
 
 
@@ -48,7 +48,7 @@ def render_ram(s: RamStats) -> Text:
     t.append("RAM:\n", style="bold")
     t.append("  ")
     t.append_text(_styled_bar(s.used, s.total))
-    t.append(f" {_gib(s.used)} / {_gib(s.total)} ({pct:.0f}%)\n")
+    t.append(f" {_gib(s.used)} / {_gib(s.total)} ({pct:.0f}%)")
     return t
 
 
@@ -58,7 +58,7 @@ def render_gpu(s: GpuStats) -> Text:
     t.append("  ")
     t.append_text(_styled_bar(s.usage))
     t.append(f" {s.usage:5.1f}%   Clock: {s.clock} MHz\n")
-    t.append(f"  {'':>{_BAR}}  Temp:  {s.temp}°C       Power: {s.power:.0f}W\n")
+    t.append(f"  {'':>{_BAR}}  Temp:  {s.temp}°C       Power: {s.power:.0f}W")
     return t
 
 
@@ -72,7 +72,7 @@ def render_processes(procs: list[GpuProcess]) -> Group | None:
     table.add_column("Command")
     for p in procs:
         table.add_row(str(p.pid), p.user, _gib(p.mem_bytes), p.command)
-    header = Text("GPU Processes:\n", style="bold")
+    header = Text("GPU Processes:", style="bold")
     return Group(header, table)
 
 
