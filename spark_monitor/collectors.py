@@ -41,6 +41,7 @@ class GpuProcess:
     user: str
     mem_bytes: int
     command: str
+    type: str = "C"  # C=compute, G=graphics
 
 
 def _cpu_temp() -> float | None:
@@ -98,15 +99,25 @@ def collect(
         power=pynvml.nvmlDeviceGetPowerUsage(handle) / 1000.0,  # mW → W
     )
 
-    # GPU processes
-    procs = [
-        GpuProcess(
+    # GPU processes — merge compute and graphics to match nvidia-smi / nv-monitor
+    seen: dict[int, GpuProcess] = {}
+    for p in pynvml.nvmlDeviceGetComputeRunningProcesses(handle):
+        seen[p.pid] = GpuProcess(
             pid=p.pid,
             user=_proc_user(p.pid),
             mem_bytes=p.usedGpuMemory,
             command=_proc_command(p.pid),
+            type="C",
         )
-        for p in pynvml.nvmlDeviceGetComputeRunningProcesses(handle)
-    ]
+    for p in pynvml.nvmlDeviceGetGraphicsRunningProcesses(handle):
+        if p.pid not in seen:
+            seen[p.pid] = GpuProcess(
+                pid=p.pid,
+                user=_proc_user(p.pid),
+                mem_bytes=p.usedGpuMemory,
+                command=_proc_command(p.pid),
+                type="G",
+            )
+    procs = list(seen.values())
 
     return cpu, ram, gpu, procs

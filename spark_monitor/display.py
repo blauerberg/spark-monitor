@@ -67,11 +67,14 @@ def render_processes(procs: list[GpuProcess]) -> Group | None:
         return None
     table = Table(show_header=True, box=None, padding=(0, 1))
     table.add_column("PID", style="cyan", no_wrap=True)
+    table.add_column("Type", no_wrap=True)
     table.add_column("User", style="green")
     table.add_column("Mem", style="yellow")
     table.add_column("Command")
     for p in procs:
-        table.add_row(str(p.pid), p.user, _gib(p.mem_bytes), p.command)
+        type_style = "magenta" if p.type == "G" else "blue"
+        type_cell = f"[{type_style}]{p.type}[/{type_style}]"
+        table.add_row(str(p.pid), type_cell, p.user, _gib(p.mem_bytes), p.command)
     header = Text("GPU Processes:", style="bold")
     return Group(header, table)
 
