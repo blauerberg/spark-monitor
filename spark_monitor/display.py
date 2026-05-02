@@ -6,9 +6,10 @@ from rich.text import Text
 
 from .collectors import CpuStats, GpuProcess, GpuStats, RamStats
 
-_BAR = 24  # bar character width
-_BAR_COMPACT = 16
-_BAR_HORIZONTAL = 8
+_BAR = 24  # bar character width (fallback for None width)
+_MAX_METRICS_WIDTH = 66  # max wide format metrics line: "  Usage: 100%  Clock: 2392 MHz  Power: 1000W  Temp: 100°C"
+_NARROW_BAR = 40  # fixed bar width below threshold
+_THRESHOLD = 75  # terminal width threshold for format switching
 
 
 def _bar(value: float, total: float = 100.0, width: int = _BAR) -> str:
@@ -31,66 +32,55 @@ def _gb(n: int) -> str:
 
 
 def render_cpu(s: CpuStats, width: int | None = None) -> Text:
-    if width is not None and width >= 80:
-        return _render_cpu_compact(s)
-    return _render_cpu_full(s)
-
-
-def _render_cpu_full(s: CpuStats) -> Text:
-    clock = f"{s.clock / 1000:.2f} GHz" if s.clock else "N/A"
-    temp = f"{s.temp:.0f}°C" if s.temp is not None else "N/A"
+    if width and width < _THRESHOLD:
+        bw = _NARROW_BAR
+    else:
+        bw = int(width * 0.8) if width else _BAR
     t = Text()
-    t.append("CPU:\n", style="bold")
-    t.append(" ")
-    t.append_text(_styled_bar(s.usage))
-    t.append(f" {s.usage:5.1f}%  Clock: {clock}\n")
-    t.append(f"  {'':>{_BAR}}  Temp: {temp}  Power: N/A")
-    return t
-
-
-def _render_cpu_compact(s: CpuStats) -> Text:
-    temp = f" {s.temp:.0f}°C" if s.temp is not None else ""
-    t = Text()
-    t.append("CPU:\n", style="bold")
-    t.append(" ")
-    t.append_text(_styled_bar(s.usage, width=_BAR_COMPACT))
-    t.append(f" {s.usage:4.0f}%{temp}")
+    t.append(" CPU: ", style="bold")
+    t.append_text(_styled_bar(s.usage, width=bw))
+    t.append("\n")
+    temp = f" Temp: {s.temp:.0f}°C" if s.temp is not None else ""
+    temp_c = f" {s.temp:.0f}°C" if s.temp is not None else ""
+    if width and width < _THRESHOLD:
+        t.append(f"        {s.usage:.1f}% {int(s.clock)}MHz N/A{temp_c}\n")
+    else:
+        t.append(f"        Usage: {s.usage:.1f}%  Clock: {int(s.clock)} MHz  Power: N/A{temp}\n")
     return t
 
 
 def render_ram(s: RamStats, width: int | None = None) -> Text:
-    b = _BAR_COMPACT if (width is not None and width >= 80) else _BAR
+    if width and width < _THRESHOLD:
+        b = _NARROW_BAR
+    else:
+        b = int((width * 0.8) if width else _BAR)
     pct = s.used / s.total * 100
+    used_gb = s.used / 1e9
+    total_gb = s.total / 1e9
     t = Text()
-    t.append("RAM:\n", style="bold")
-    t.append(" ")
+    t.append(" RAM: ", style="bold")
     t.append_text(_styled_bar(s.used, s.total, b))
-    t.append(f" {_gb(s.used)}/{_gb(s.total)} ({pct:.0f}%)")
+    t.append("\n")
+    if width and width < _THRESHOLD:
+        t.append(f"        {used_gb:.1f}/{total_gb:.1f} GB ({pct:.0f}%)\n")
+    else:
+        t.append(f"        Usage: {used_gb:.1f}/{total_gb:.1f} GB ({pct:.0f}%)\n")
     return t
 
 
 def render_gpu(s: GpuStats, width: int | None = None) -> Text:
-    if width is not None and width >= 80:
-        return _render_gpu_compact(s)
-    return _render_gpu_full(s)
-
-
-def _render_gpu_full(s: GpuStats) -> Text:
+    if width and width < _THRESHOLD:
+        bw = _NARROW_BAR
+    else:
+        bw = int(width * 0.8) if width else _BAR
     t = Text()
-    t.append("GPU:\n", style="bold")
-    t.append(" ")
-    t.append_text(_styled_bar(s.usage))
-    t.append(f" {s.usage:5.1f}%  Clock: {s.clock} MHz\n")
-    t.append(f"  {'':>{_BAR}}  Temp: {s.temp}°C  Power: {s.power:.0f}W")
-    return t
-
-
-def _render_gpu_compact(s: GpuStats) -> Text:
-    t = Text()
-    t.append("GPU:\n", style="bold")
-    t.append(" ")
-    t.append_text(_styled_bar(s.usage, width=_BAR_COMPACT))
-    t.append(f" {s.usage:4.0f}% {s.temp}°C {s.power:.0f}W")
+    t.append(" GPU: ", style="bold")
+    t.append_text(_styled_bar(s.usage, width=bw))
+    t.append("\n")
+    if width and width < _THRESHOLD:
+        t.append(f"        {s.usage:.1f}% {int(s.clock)}MHz {s.power:.0f}W {s.temp}°C\n")
+    else:
+        t.append(f"        Usage: {s.usage:.1f}%  Clock: {int(s.clock)} MHz  Power: {s.power:.0f}W  Temp: {s.temp}°C\n")
     return t
 
 
@@ -107,54 +97,12 @@ def render_processes(procs: list[GpuProcess]) -> Group | None:
         type_style = "magenta" if p.type == "G" else "blue"
         type_cell = f"[{type_style}]{p.type}[/{type_style}]"
         table.add_row(str(p.pid), type_cell, p.user, _gb(p.mem_bytes), p.command)
-    header = Text("GPU Processes:", style="bold")
+    header = Text(" GPU Processes:", style="bold")
     return Group(header, table)
 
 
-def render_compact_vertical(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Text:
-    temp_cpu = f" {cpu.temp:.0f}°C" if cpu.temp is not None else ""
-    temp_gpu = f" {gpu.temp}°C"
-    pct_ram = ram.used / ram.total * 100
-    b = _BAR_COMPACT
-    t = Text()
-    t.append("\n")
-    t.append(" CPU", style="bold cyan")
-    t.append(" ")
-    t.append_text(_styled_bar(cpu.usage, width=b))
-    t.append(f" {cpu.usage:4.0f}%{temp_cpu}\n")
-    t.append(" RAM", style="bold green")
-    t.append(" ")
-    t.append_text(_styled_bar(ram.used, ram.total, b))
-    t.append(f" {pct_ram:4.0f}%\n")
-    t.append(" GPU", style="bold yellow")
-    t.append(" ")
-    t.append_text(_styled_bar(gpu.usage, width=b))
-    t.append(f" {gpu.usage:4.0f}%{temp_gpu} {gpu.power:.0f}W\n")
-    return t
-
-
-def render_compact_horizontal(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Text:
-    pct_ram = ram.used / ram.total * 100
-    b = _BAR_HORIZONTAL
-    temp_cpu = f" {cpu.temp:.0f}°C" if cpu.temp is not None else ""
-    t = Text()
-    t.append("\n")
-    t.append(" CPU", style="bold cyan")
-    t.append("")
-    t.append_text(_styled_bar(cpu.usage, width=b))
-    t.append(f" {cpu.usage:4.0f}%{temp_cpu} ")
-    t.append("RAM", style="bold green")
-    t.append("")
-    t.append_text(_styled_bar(ram.used, ram.total, b))
-    t.append(f" {pct_ram:4.0f}% ")
-    t.append("GPU", style="bold yellow")
-    t.append("")
-    t.append_text(_styled_bar(gpu.usage, width=b))
-    t.append(f" {gpu.usage:4.0f}% {gpu.temp}°C {gpu.power:.0f}W\n")
-    return t
-
-
 def render_statusline(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Text:
+    _BAR_HORIZONTAL = 8
     pct_ram = ram.used / ram.total * 100
     b = _BAR_HORIZONTAL
     temp_cpu = f" {cpu.temp:.0f}°C" if cpu.temp is not None else ""
@@ -181,12 +129,12 @@ def render_all(
     procs: list[GpuProcess],
     width: int | None = None,
 ) -> Group:
-    sections: list = [
-        render_cpu(cpu, width=width),
-        render_ram(ram, width=width),
-        render_gpu(gpu, width=width),
-    ]
+    t = Text("\n")
+    t.append_text(render_cpu(cpu, width=width))
+    t.append_text(render_ram(ram, width=width))
+    t.append_text(render_gpu(gpu, width=width))
     proc_section = render_processes(procs)
+    sections: list = [t]
     if proc_section:
         sections.append(proc_section)
     return Group(*sections)
