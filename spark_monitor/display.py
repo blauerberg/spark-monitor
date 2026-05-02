@@ -58,12 +58,13 @@ def _render_cpu_compact(s: CpuStats) -> Text:
     return t
 
 
-def render_ram(s: RamStats) -> Text:
+def render_ram(s: RamStats, width: int | None = None) -> Text:
+    b = _BAR_COMPACT if (width is not None and width >= 80) else _BAR
     pct = s.used / s.total * 100
     t = Text()
     t.append("RAM:\n", style="bold")
     t.append(" ")
-    t.append_text(_styled_bar(s.used, s.total))
+    t.append_text(_styled_bar(s.used, s.total, b))
     t.append(f" {_gb(s.used)}/{_gb(s.total)} ({pct:.0f}%)")
     return t
 
@@ -182,7 +183,7 @@ def render_all(
 ) -> Group:
     sections: list = [
         render_cpu(cpu, width=width),
-        render_ram(ram),
+        render_ram(ram, width=width),
         render_gpu(gpu, width=width),
     ]
     proc_section = render_processes(procs)

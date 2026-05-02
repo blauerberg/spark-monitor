@@ -78,13 +78,13 @@ def test_render_statusline_contains_all_metrics():
 
 def test_render_cpu_compact_has_bar_and_metrics_on_one_line():
     text = render_cpu(_CPU, width=80)
-    lines = [l for l in text.plain.splitlines() if l]
+    lines = [line for line in text.plain.splitlines() if line]
     assert len(lines) == 2  # label + bar+metrics
 
 
 def test_render_gpu_compact_has_bar_and_metrics_on_one_line():
     text = render_gpu(_GPU, width=80)
-    lines = [l for l in text.plain.splitlines() if l]
+    lines = [line for line in text.plain.splitlines() if line]
     assert len(lines) == 2  # label + bar+metrics
 
 
