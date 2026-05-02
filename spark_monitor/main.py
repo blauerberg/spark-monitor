@@ -80,7 +80,7 @@ def main() -> None:
         with Live(auto_refresh=False, screen=True) as live:
             while True:
                 cpu, ram, gpu, procs = collect()
-                width = live.console.width
+                width = Console(force_terminal=True).width
                 if mode is DisplayMode.VERTICAL:
                     live.update(render_compact_vertical(cpu, ram, gpu))
                 elif mode is DisplayMode.HORIZONTAL:
