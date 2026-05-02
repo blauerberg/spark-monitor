@@ -30,7 +30,13 @@ def _gb(n: int) -> str:
     return f"{n / 1000**3:.1f} GB"
 
 
-def render_cpu(s: CpuStats) -> Text:
+def render_cpu(s: CpuStats, width: int | None = None) -> Text:
+    if width is not None and width >= 80:
+        return _render_cpu_compact(s)
+    return _render_cpu_full(s)
+
+
+def _render_cpu_full(s: CpuStats) -> Text:
     clock = f"{s.clock / 1000:.2f} GHz" if s.clock else "N/A"
     temp = f"{s.temp:.0f}°C" if s.temp is not None else "N/A"
     t = Text()
@@ -39,6 +45,15 @@ def render_cpu(s: CpuStats) -> Text:
     t.append_text(_styled_bar(s.usage))
     t.append(f" {s.usage:5.1f}%  Clock: {clock}\n")
     t.append(f"  {'':>{_BAR}}  Temp: {temp}  Power: N/A")
+    return t
+
+
+def _render_cpu_compact(s: CpuStats) -> Text:
+    temp = f" {s.temp:.0f}°C" if s.temp is not None else ""
+    t = Text()
+    t.append("CPU: ", style="bold")
+    t.append_text(_styled_bar(s.usage, width=_BAR_COMPACT))
+    t.append(f" {s.usage:4.0f}%{temp}")
     return t
 
 
@@ -52,13 +67,27 @@ def render_ram(s: RamStats) -> Text:
     return t
 
 
-def render_gpu(s: GpuStats) -> Text:
+def render_gpu(s: GpuStats, width: int | None = None) -> Text:
+    if width is not None and width >= 80:
+        return _render_gpu_compact(s)
+    return _render_gpu_full(s)
+
+
+def _render_gpu_full(s: GpuStats) -> Text:
     t = Text()
     t.append("GPU:\n", style="bold")
     t.append(" ")
     t.append_text(_styled_bar(s.usage))
     t.append(f" {s.usage:5.1f}%  Clock: {s.clock} MHz\n")
     t.append(f"  {'':>{_BAR}}  Temp: {s.temp}°C  Power: {s.power:.0f}W")
+    return t
+
+
+def _render_gpu_compact(s: GpuStats) -> Text:
+    t = Text()
+    t.append("GPU: ", style="bold")
+    t.append_text(_styled_bar(s.usage, width=_BAR_COMPACT))
+    t.append(f" {s.usage:4.0f}% {s.temp}°C {s.power:.0f}W")
     return t
 
 
@@ -147,8 +176,13 @@ def render_all(
     ram: RamStats,
     gpu: GpuStats,
     procs: list[GpuProcess],
+    width: int | None = None,
 ) -> Group:
-    sections: list = [render_cpu(cpu), render_ram(ram), render_gpu(gpu)]
+    sections: list = [
+        render_cpu(cpu, width=width),
+        render_ram(ram),
+        render_gpu(gpu, width=width),
+    ]
     proc_section = render_processes(procs)
     if proc_section:
         sections.append(proc_section)

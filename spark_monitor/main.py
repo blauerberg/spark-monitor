@@ -80,12 +80,13 @@ def main() -> None:
         with Live(auto_refresh=False, screen=True) as live:
             while True:
                 cpu, ram, gpu, procs = collect()
+                width = live.console.width
                 if mode is DisplayMode.VERTICAL:
                     live.update(render_compact_vertical(cpu, ram, gpu))
                 elif mode is DisplayMode.HORIZONTAL:
                     live.update(render_compact_horizontal(cpu, ram, gpu))
                 else:
-                    live.update(render_all(cpu, ram, gpu, procs))
+                    live.update(render_all(cpu, ram, gpu, procs, width=width))
                 live.refresh()
                 time.sleep(args.interval)
     except KeyboardInterrupt:

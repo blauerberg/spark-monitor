@@ -1,7 +1,12 @@
+from rich.console import Console
+
 from spark_monitor.collectors import CpuStats, GpuStats, RamStats
 from spark_monitor.display import (
+    render_all,
     render_compact_horizontal,
     render_compact_vertical,
+    render_cpu,
+    render_gpu,
     render_statusline,
 )
 
@@ -69,3 +74,56 @@ def test_render_statusline_contains_all_metrics():
     assert "52" in plain  # CPU temp
     assert "67" in plain  # GPU temp
     assert "250" in plain  # GPU power
+
+
+def test_render_cpu_compact_is_single_line():
+    text = render_cpu(_CPU, width=80)
+    assert text.plain.count("\n") == 0
+
+
+def test_render_gpu_compact_is_single_line():
+    text = render_gpu(_GPU, width=80)
+    assert text.plain.count("\n") == 0
+
+
+def test_render_cpu_compact_contains_metrics():
+    text = render_cpu(_CPU, width=80)
+    plain = text.plain
+    assert "CPU" in plain
+    assert "45" in plain
+    assert "52" in plain
+
+
+def test_render_gpu_compact_contains_metrics():
+    text = render_gpu(_GPU, width=80)
+    plain = text.plain
+    assert "GPU" in plain
+    assert "89" in plain
+    assert "67" in plain
+    assert "250" in plain
+
+
+def test_render_cpu_full_when_narrow():
+    text = render_cpu(_CPU, width=60)
+    assert "\n" in text.plain
+
+
+def test_render_gpu_full_when_narrow():
+    text = render_gpu(_GPU, width=60)
+    assert "\n" in text.plain
+
+
+def test_render_all_uses_compact_when_width_ge_80():
+    console = Console(record=True, width=120)
+    console.print(render_all(_CPU, _RAM, _GPU, [], width=80))
+    plain = console.export_text()
+    assert "CPU: " in plain  # compact uses "CPU: " not "CPU:\n"
+    assert "GPU: " in plain  # compact uses "GPU: " not "GPU:\n"
+
+
+def test_render_all_uses_full_when_width_lt_80():
+    console = Console(record=True, width=120)
+    console.print(render_all(_CPU, _RAM, _GPU, [], width=60))
+    plain = console.export_text()
+    assert "CPU:\n" in plain  # full uses "CPU:\n"
+    assert "GPU:\n" in plain  # full uses "GPU:\n"
