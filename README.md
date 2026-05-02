@@ -2,8 +2,6 @@
 
 A minimal CLI for monitoring DGX Spark resource usage. Displays only the essential metrics, simply.
 
-**Default** — full metrics with process list
-
 ![Screenshot](images/screenshot.png)
 
 ## Quick Start
@@ -70,5 +68,5 @@ uv run spark-monitor
 - **CPU**: usage (bar), clock, power (N/A), temperature
   - Power is always N/A. The current driver does not expose Grace CPU power.
 - **RAM**: usage (bar)
-- **GPU**: usage (bar), clock, temperature, power
+- **GPU**: usage (bar), clock, power, temperature
 - **GPU Processes**: processes using the GPU (hidden when none)
