@@ -26,39 +26,71 @@ def _styled_bar(value: float, total: float = 100.0, width: int = _BAR) -> Text:
     return t
 
 
-def _gib(n: int) -> str:
-    return f"{n / 1024**3:.1f} GiB"
+def _gb(n: int) -> str:
+    return f"{n / 1000**3:.1f} GB"
 
 
-def render_cpu(s: CpuStats) -> Text:
+def render_cpu(s: CpuStats, width: int | None = None) -> Text:
+    if width is not None and width >= 80:
+        return _render_cpu_compact(s)
+    return _render_cpu_full(s)
+
+
+def _render_cpu_full(s: CpuStats) -> Text:
     clock = f"{s.clock / 1000:.2f} GHz" if s.clock else "N/A"
     temp = f"{s.temp:.0f}°C" if s.temp is not None else "N/A"
     t = Text()
     t.append("CPU:\n", style="bold")
-    t.append("  ")
+    t.append(" ")
     t.append_text(_styled_bar(s.usage))
-    t.append(f" {s.usage:5.1f}%   Clock: {clock}\n")
-    t.append(f"  {'':>{_BAR}}  Temp:  {temp:<9}  Power: N/A")
+    t.append(f" {s.usage:5.1f}%  Clock: {clock}\n")
+    t.append(f"  {'':>{_BAR}}  Temp: {temp}  Power: N/A")
     return t
 
 
-def render_ram(s: RamStats) -> Text:
+def _render_cpu_compact(s: CpuStats) -> Text:
+    temp = f" {s.temp:.0f}°C" if s.temp is not None else ""
+    t = Text()
+    t.append("CPU:\n", style="bold")
+    t.append(" ")
+    t.append_text(_styled_bar(s.usage, width=_BAR_COMPACT))
+    t.append(f" {s.usage:4.0f}%{temp}")
+    return t
+
+
+def render_ram(s: RamStats, width: int | None = None) -> Text:
+    b = _BAR_COMPACT if (width is not None and width >= 80) else _BAR
     pct = s.used / s.total * 100
     t = Text()
     t.append("RAM:\n", style="bold")
-    t.append("  ")
-    t.append_text(_styled_bar(s.used, s.total))
-    t.append(f" {_gib(s.used)} / {_gib(s.total)} ({pct:.0f}%)")
+    t.append(" ")
+    t.append_text(_styled_bar(s.used, s.total, b))
+    t.append(f" {_gb(s.used)}/{_gb(s.total)} ({pct:.0f}%)")
     return t
 
 
-def render_gpu(s: GpuStats) -> Text:
+def render_gpu(s: GpuStats, width: int | None = None) -> Text:
+    if width is not None and width >= 80:
+        return _render_gpu_compact(s)
+    return _render_gpu_full(s)
+
+
+def _render_gpu_full(s: GpuStats) -> Text:
     t = Text()
     t.append("GPU:\n", style="bold")
-    t.append("  ")
+    t.append(" ")
     t.append_text(_styled_bar(s.usage))
-    t.append(f" {s.usage:5.1f}%   Clock: {s.clock} MHz\n")
-    t.append(f"  {'':>{_BAR}}  Temp:  {s.temp}°C       Power: {s.power:.0f}W")
+    t.append(f" {s.usage:5.1f}%  Clock: {s.clock} MHz\n")
+    t.append(f"  {'':>{_BAR}}  Temp: {s.temp}°C  Power: {s.power:.0f}W")
+    return t
+
+
+def _render_gpu_compact(s: GpuStats) -> Text:
+    t = Text()
+    t.append("GPU:\n", style="bold")
+    t.append(" ")
+    t.append_text(_styled_bar(s.usage, width=_BAR_COMPACT))
+    t.append(f" {s.usage:4.0f}% {s.temp}°C {s.power:.0f}W")
     return t
 
 
@@ -74,71 +106,71 @@ def render_processes(procs: list[GpuProcess]) -> Group | None:
     for p in procs:
         type_style = "magenta" if p.type == "G" else "blue"
         type_cell = f"[{type_style}]{p.type}[/{type_style}]"
-        table.add_row(str(p.pid), type_cell, p.user, _gib(p.mem_bytes), p.command)
+        table.add_row(str(p.pid), type_cell, p.user, _gb(p.mem_bytes), p.command)
     header = Text("GPU Processes:", style="bold")
     return Group(header, table)
 
 
 def render_compact_vertical(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Text:
-    temp_cpu = f"  {cpu.temp:.0f}°C" if cpu.temp is not None else ""
-    temp_gpu = f"  {gpu.temp}°C"
+    temp_cpu = f" {cpu.temp:.0f}°C" if cpu.temp is not None else ""
+    temp_gpu = f" {gpu.temp}°C"
     pct_ram = ram.used / ram.total * 100
     b = _BAR_COMPACT
     t = Text()
     t.append("\n")
-    t.append("  CPU", style="bold cyan")
-    t.append("  ")
+    t.append(" CPU", style="bold cyan")
+    t.append(" ")
     t.append_text(_styled_bar(cpu.usage, width=b))
     t.append(f" {cpu.usage:4.0f}%{temp_cpu}\n")
-    t.append("  RAM", style="bold green")
-    t.append("  ")
+    t.append(" RAM", style="bold green")
+    t.append(" ")
     t.append_text(_styled_bar(ram.used, ram.total, b))
     t.append(f" {pct_ram:4.0f}%\n")
-    t.append("  GPU", style="bold yellow")
-    t.append("  ")
+    t.append(" GPU", style="bold yellow")
+    t.append(" ")
     t.append_text(_styled_bar(gpu.usage, width=b))
-    t.append(f" {gpu.usage:4.0f}%{temp_gpu}  {gpu.power:.0f}W\n")
+    t.append(f" {gpu.usage:4.0f}%{temp_gpu} {gpu.power:.0f}W\n")
     return t
 
 
 def render_compact_horizontal(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Text:
     pct_ram = ram.used / ram.total * 100
     b = _BAR_HORIZONTAL
-    temp_cpu = f"  {cpu.temp:.0f}°C" if cpu.temp is not None else ""
+    temp_cpu = f" {cpu.temp:.0f}°C" if cpu.temp is not None else ""
     t = Text()
     t.append("\n")
-    t.append("  CPU", style="bold cyan")
-    t.append(" ")
+    t.append(" CPU", style="bold cyan")
+    t.append("")
     t.append_text(_styled_bar(cpu.usage, width=b))
-    t.append(f" {cpu.usage:4.0f}%{temp_cpu}  ")
+    t.append(f" {cpu.usage:4.0f}%{temp_cpu} ")
     t.append("RAM", style="bold green")
-    t.append(" ")
+    t.append("")
     t.append_text(_styled_bar(ram.used, ram.total, b))
-    t.append(f" {pct_ram:4.0f}%  ")
+    t.append(f" {pct_ram:4.0f}% ")
     t.append("GPU", style="bold yellow")
-    t.append(" ")
+    t.append("")
     t.append_text(_styled_bar(gpu.usage, width=b))
-    t.append(f" {gpu.usage:4.0f}%  {gpu.temp}°C  {gpu.power:.0f}W\n")
+    t.append(f" {gpu.usage:4.0f}% {gpu.temp}°C {gpu.power:.0f}W\n")
     return t
 
 
 def render_statusline(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Text:
     pct_ram = ram.used / ram.total * 100
     b = _BAR_HORIZONTAL
-    temp_cpu = f"  {cpu.temp:.0f}°C" if cpu.temp is not None else ""
+    temp_cpu = f" {cpu.temp:.0f}°C" if cpu.temp is not None else ""
     t = Text()
     t.append("CPU", style="bold cyan")
-    t.append(" ")
+    t.append("")
     t.append_text(_styled_bar(cpu.usage, width=b))
-    t.append(f" {cpu.usage:4.0f}%{temp_cpu}  ")
+    t.append(f" {cpu.usage:4.0f}%{temp_cpu} ")
     t.append("RAM", style="bold green")
-    t.append(" ")
+    t.append("")
     t.append_text(_styled_bar(ram.used, ram.total, b))
-    t.append(f" {pct_ram:4.0f}%  ")
+    t.append(f" {pct_ram:4.0f}% ")
     t.append("GPU", style="bold yellow")
-    t.append(" ")
+    t.append("")
     t.append_text(_styled_bar(gpu.usage, width=b))
-    t.append(f" {gpu.usage:4.0f}%  {gpu.temp}°C  {gpu.power:.0f}W")
+    t.append(f" {gpu.usage:4.0f}% {gpu.temp}°C {gpu.power:.0f}W")
     return t
 
 
@@ -147,8 +179,13 @@ def render_all(
     ram: RamStats,
     gpu: GpuStats,
     procs: list[GpuProcess],
+    width: int | None = None,
 ) -> Group:
-    sections: list = [render_cpu(cpu), render_ram(ram), render_gpu(gpu)]
+    sections: list = [
+        render_cpu(cpu, width=width),
+        render_ram(ram, width=width),
+        render_gpu(gpu, width=width),
+    ]
     proc_section = render_processes(procs)
     if proc_section:
         sections.append(proc_section)
