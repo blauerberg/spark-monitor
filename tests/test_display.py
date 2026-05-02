@@ -76,14 +76,16 @@ def test_render_statusline_contains_all_metrics():
     assert "250" in plain  # GPU power
 
 
-def test_render_cpu_compact_is_single_line():
+def test_render_cpu_compact_has_bar_and_metrics_on_one_line():
     text = render_cpu(_CPU, width=80)
-    assert text.plain.count("\n") == 0
+    lines = [l for l in text.plain.splitlines() if l]
+    assert len(lines) == 2  # label + bar+metrics
 
 
-def test_render_gpu_compact_is_single_line():
+def test_render_gpu_compact_has_bar_and_metrics_on_one_line():
     text = render_gpu(_GPU, width=80)
-    assert text.plain.count("\n") == 0
+    lines = [l for l in text.plain.splitlines() if l]
+    assert len(lines) == 2  # label + bar+metrics
 
 
 def test_render_cpu_compact_contains_metrics():
@@ -117,13 +119,13 @@ def test_render_all_uses_compact_when_width_ge_80():
     console = Console(record=True, width=120)
     console.print(render_all(_CPU, _RAM, _GPU, [], width=80))
     plain = console.export_text()
-    assert "CPU: " in plain  # compact uses "CPU: " not "CPU:\n"
-    assert "GPU: " in plain  # compact uses "GPU: " not "GPU:\n"
+    assert "Clock:" not in plain  # compact omits Clock
+    assert "Power: N/A" not in plain  # compact omits Power line
 
 
 def test_render_all_uses_full_when_width_lt_80():
     console = Console(record=True, width=120)
     console.print(render_all(_CPU, _RAM, _GPU, [], width=60))
     plain = console.export_text()
-    assert "CPU:\n" in plain  # full uses "CPU:\n"
-    assert "GPU:\n" in plain  # full uses "GPU:\n"
+    assert "Clock:" in plain  # full includes Clock
+    assert "Power: N/A" in plain  # full includes Power line

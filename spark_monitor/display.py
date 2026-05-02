@@ -51,7 +51,8 @@ def _render_cpu_full(s: CpuStats) -> Text:
 def _render_cpu_compact(s: CpuStats) -> Text:
     temp = f" {s.temp:.0f}°C" if s.temp is not None else ""
     t = Text()
-    t.append("CPU: ", style="bold")
+    t.append("CPU:\n", style="bold")
+    t.append(" ")
     t.append_text(_styled_bar(s.usage, width=_BAR_COMPACT))
     t.append(f" {s.usage:4.0f}%{temp}")
     return t
@@ -85,7 +86,8 @@ def _render_gpu_full(s: GpuStats) -> Text:
 
 def _render_gpu_compact(s: GpuStats) -> Text:
     t = Text()
-    t.append("GPU: ", style="bold")
+    t.append("GPU:\n", style="bold")
+    t.append(" ")
     t.append_text(_styled_bar(s.usage, width=_BAR_COMPACT))
     t.append(f" {s.usage:4.0f}% {s.temp}°C {s.power:.0f}W")
     return t
