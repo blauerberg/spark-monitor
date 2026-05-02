@@ -10,18 +10,11 @@ from rich.console import Console
 from rich.live import Live
 
 from .collectors import collect
-from .display import (
-    render_all,
-    render_compact_horizontal,
-    render_compact_vertical,
-    render_statusline,
-)
+from .display import render_all, render_statusline
 
 
 class DisplayMode(enum.Enum):
     FULL = "full"
-    VERTICAL = "vertical"
-    HORIZONTAL = "horizontal"
     STATUSLINE = "statusline"
 
 
@@ -34,18 +27,7 @@ def _make_parser() -> argparse.ArgumentParser:
         metavar="SEC",
         help="Refresh interval in seconds (default: 1.0)",
     )
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument(
-        "--compact-vertical",
-        action="store_true",
-        help="Show minimal metrics in a compact 3-line layout",
-    )
-    group.add_argument(
-        "--compact-horizontal",
-        action="store_true",
-        help="Show all metrics in a single line",
-    )
-    group.add_argument(
+    parser.add_argument(
         "--statusline",
         action="store_true",
         help="Print a single line for use in tmux statusline, then exit",
@@ -56,11 +38,7 @@ def _make_parser() -> argparse.ArgumentParser:
 def main() -> None:
     args = _make_parser().parse_args()
 
-    if args.compact_vertical:
-        mode = DisplayMode.VERTICAL
-    elif args.compact_horizontal:
-        mode = DisplayMode.HORIZONTAL
-    elif args.statusline:
+    if args.statusline:
         mode = DisplayMode.STATUSLINE
     else:
         mode = DisplayMode.FULL
@@ -80,12 +58,8 @@ def main() -> None:
         with Live(auto_refresh=False, screen=True) as live:
             while True:
                 cpu, ram, gpu, procs = collect()
-                if mode is DisplayMode.VERTICAL:
-                    live.update(render_compact_vertical(cpu, ram, gpu))
-                elif mode is DisplayMode.HORIZONTAL:
-                    live.update(render_compact_horizontal(cpu, ram, gpu))
-                else:
-                    live.update(render_all(cpu, ram, gpu, procs))
+                width = Console(force_terminal=True).width
+                live.update(render_all(cpu, ram, gpu, procs, width=width))
                 live.refresh()
                 time.sleep(args.interval)
     except KeyboardInterrupt:
