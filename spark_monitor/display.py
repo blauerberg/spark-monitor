@@ -7,7 +7,7 @@ from rich.text import Text
 from .collectors import CpuStats, GpuProcess, GpuStats, RamStats
 
 _BAR = 24  # bar character width (fallback for None width)
-_MAX_METRICS_WIDTH = 66  # max wide format metrics line: "  Usage: 100%  Clock: 2392 MHz  Power: 1000W  Temp: 100°C"
+_MAX_METRICS_WIDTH = 66  # max wide format metrics line: "  Usage: 100%  Clock: 2392 MHz  Power: 1000W  Temp: 100°C"  # noqa: E501
 _NARROW_BAR = 40  # fixed bar width below threshold
 _THRESHOLD = 75  # terminal width threshold for format switching
 
@@ -46,7 +46,7 @@ def render_cpu(s: CpuStats, width: int | None = None) -> Text:
         t.append(f"        {s.usage:.1f}% {int(s.clock)}MHz N/A{temp_c}\n")
     else:
         t.append(
-            f"        Usage: {s.usage:.1f}%  Clock: {int(s.clock)} MHz  Power: N/A{temp}\n"
+            f"        Usage: {s.usage:.1f}%  Clock: {int(s.clock)} MHz  Power: N/A{temp}\n"  # noqa: E501
         )
     return t
 
@@ -85,7 +85,7 @@ def render_gpu(s: GpuStats, width: int | None = None) -> Text:
         )
     else:
         t.append(
-            f"        Usage: {s.usage:.1f}%  Clock: {int(s.clock)} MHz  Power: {s.power:.0f}W  Temp: {s.temp}°C\n"
+            f"        Usage: {s.usage:.1f}%  Clock: {int(s.clock)} MHz  Power: {s.power:.0f}W  Temp: {s.temp}°C\n"  # noqa: E501
         )
     return t
 
