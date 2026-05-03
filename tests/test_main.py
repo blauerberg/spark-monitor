@@ -1,4 +1,3 @@
-import pytest
 
 from spark_monitor.main import DisplayMode, _make_parser
 
