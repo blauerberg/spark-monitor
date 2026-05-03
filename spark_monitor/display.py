@@ -115,7 +115,7 @@ def render_statusline(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Text:
     t.append("")
     t.append_text(_styled_bar(ram.used, ram.total, b))
     t.append(f" {pct_ram:2.0f}% ")
-    t.append("GPU", style="bold yellow")
+    t.append("GPU:", style="bold yellow")
     t.append("")
     t.append_text(_styled_bar(gpu.usage, width=b))
     t.append(f" {gpu.usage:2.0f}% {gpu.temp}°C {gpu.power:.0f}W")
