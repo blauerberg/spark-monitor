@@ -102,23 +102,23 @@ def render_processes(procs: list[GpuProcess]) -> Group | None:
 
 
 def render_statusline(cpu: CpuStats, ram: RamStats, gpu: GpuStats) -> Text:
-    _BAR_HORIZONTAL = 8
+    _BAR_HORIZONTAL = 5
     pct_ram = ram.used / ram.total * 100
     b = _BAR_HORIZONTAL
     temp_cpu = f" {cpu.temp:.0f}°C" if cpu.temp is not None else ""
     t = Text()
-    t.append("CPU", style="bold cyan")
+    t.append("CPU:", style="bold cyan")
     t.append("")
     t.append_text(_styled_bar(cpu.usage, width=b))
-    t.append(f" {cpu.usage:4.0f}%{temp_cpu} ")
-    t.append("RAM", style="bold green")
+    t.append(f" {cpu.usage:2.0f}%{temp_cpu} ")
+    t.append("RAM:", style="bold green")
     t.append("")
     t.append_text(_styled_bar(ram.used, ram.total, b))
-    t.append(f" {pct_ram:4.0f}% ")
+    t.append(f" {pct_ram:2.0f}% ")
     t.append("GPU", style="bold yellow")
     t.append("")
     t.append_text(_styled_bar(gpu.usage, width=b))
-    t.append(f" {gpu.usage:4.0f}% {gpu.temp}°C {gpu.power:.0f}W")
+    t.append(f" {gpu.usage:2.0f}% {gpu.temp}°C {gpu.power:.0f}W")
     return t
 
 
