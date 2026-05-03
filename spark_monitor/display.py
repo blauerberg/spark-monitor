@@ -45,7 +45,9 @@ def render_cpu(s: CpuStats, width: int | None = None) -> Text:
     if width and width < _THRESHOLD:
         t.append(f"        {s.usage:.1f}% {int(s.clock)}MHz N/A{temp_c}\n")
     else:
-        t.append(f"        Usage: {s.usage:.1f}%  Clock: {int(s.clock)} MHz  Power: N/A{temp}\n")
+        t.append(
+            f"        Usage: {s.usage:.1f}%  Clock: {int(s.clock)} MHz  Power: N/A{temp}\n"
+        )
     return t
 
 
@@ -78,9 +80,13 @@ def render_gpu(s: GpuStats, width: int | None = None) -> Text:
     t.append_text(_styled_bar(s.usage, width=bw))
     t.append("\n")
     if width and width < _THRESHOLD:
-        t.append(f"        {s.usage:.1f}% {int(s.clock)}MHz {s.power:.0f}W {s.temp}°C\n")
+        t.append(
+            f"        {s.usage:.1f}% {int(s.clock)}MHz {s.power:.0f}W {s.temp}°C\n"
+        )
     else:
-        t.append(f"        Usage: {s.usage:.1f}%  Clock: {int(s.clock)} MHz  Power: {s.power:.0f}W  Temp: {s.temp}°C\n")
+        t.append(
+            f"        Usage: {s.usage:.1f}%  Clock: {int(s.clock)} MHz  Power: {s.power:.0f}W  Temp: {s.temp}°C\n"
+        )
     return t
 
 
