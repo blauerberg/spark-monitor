@@ -28,7 +28,7 @@ def _styled_bar(value: float, total: float = 100.0, width: int = _BAR) -> Text:
 
 
 def _gb(n: int) -> str:
-    return f"{n / 1000**3:.1f} GB"
+    return f"{n / 1024**3:.1f} GB"
 
 
 def render_cpu(s: CpuStats, width: int | None = None) -> Text:
@@ -57,8 +57,8 @@ def render_ram(s: RamStats, width: int | None = None) -> Text:
     else:
         b = int((width * 0.8) if width else _BAR)
     pct = s.used / s.total * 100
-    used_gb = s.used / 1e9
-    total_gb = s.total / 1e9
+    used_gb = s.used / 1024**3
+    total_gb = s.total / 1024**3
     t = Text()
     t.append(" RAM: ", style="bold")
     t.append_text(_styled_bar(s.used, s.total, b))
